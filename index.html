@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BudgetApp</title> 
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .displayBudget{
+            width: 100%;
+            display: flex;
+            
+        }
+        .expBox{
+            width: 40%;
+            background-color: red;
+        }
+        .incBox{
+            width: 40%;
+            background-color: greenyellow;
+            list-style: none;
+        }
+        ul>li{
+            display: flex;
+            padding: 1rem;
+            justify-content: space-between;
+            border-bottom: 1px solid #fff;
+        }
+    </style>   
+</head>
+<body>
+    <form action="#" style="margin-bottom: 5%;">
+        <select class="type" name="" id="">
+            <option value="exp">-</option>
+            <option value="inc">+</option>
+        </select>   
+        <input type="number" class="amount">
+        <input type="text" class="desc">
+        <button class="btn">Add</button>
+    </form>
+    <div class="displayBudget">
+        <ul class="expBox">
+
+        </ul>
+        <ul class="incBox">
+         
+        </ul>
+    </div>
+    <script>
+        
+    /*<!--UI CONTROLER-->*/
+    var uictrl=(function(){
+        var domString = {
+            type:'.type',
+            amount:'.amount',
+            desc:'.desc',
+            btn:'.btn',
+            expBox:'.expBox',
+            incBox:'.incBox',
+            
+        }
+        
+        /*all Domvalue object*/
+        var getValue = function(){
+            return function(){
+                var domValue = {
+                    type:document.querySelector(domString.type).value,
+                    amount:document.querySelector(domString.amount).value,
+                    desc:document.querySelector(domString.desc).value
+                } 
+                return domValue;
+            }           
+        }
+        /*display html string*/
+            var displayEle = function(obj,type){
+
+            if(type === 'exp'){
+                var parentEle = domString.expBox;
+               var html  = '<li id="exp-%id%"><p>1</p><p>%desc%</p><p>%amount%</p><button>Delete</button></li>'; 
+            }else if(type === 'inc'){
+                var parentEle = domString.incBox;
+                 var html ='<li id="inc-%id%"><p>1</p><p>%desc%</p><p>%amount%</p><button>Delete</button></li>'; 
+            }             
+                 var newHtml = html.replace('%id%',obj.id);
+                 var newHtml = newHtml.replace('%desc%',obj.desc);
+                 var newHtml = newHtml.replace('%amount%',obj.amount); 
+                document.querySelector(parentEle).insertAdjacentHTML('beforeend',newHtml);     
+            }            
+        
+        /*publicAccess*/
+        return {
+            domEle: domString,
+            domValue:getValue(),
+            displayPub:displayEle
+
+        }
+    })();
+
+    /*<!--DATA CONTROLER-->*/
+    var datactrl=(function(){
+        
+        var Expense = function(id,amount,desc){
+            this.id=id;
+            this.amount = amount;
+            this.desc = desc;
+        }
+        var Income = function(id,amount,desc){
+            this.id=id;
+            this.amount = amount;
+            this.desc = desc;
+        } 
+        
+        
+        /*database structure*/
+        var dataBase = {
+            allItems:{
+                exp : [],
+                inc:[]
+            }
+        }
+        
+        var pushValue = function(type,amount,desc){
+            var ID
+            if (dataBase.allItems[type].length>0){
+               ID = dataBase.allItems[type][dataBase.allItems[type].length-1].id+1; 
+            }else{
+                ID = 0;
+            }
+            if(type === 'exp'){
+                var newItem = new Expense(ID,amount,desc);
+            }else if(type=== 'inc'){
+                var newItem = new Income(ID,amount,desc);
+            } 
+            return dataBase.allItems[type].push(newItem);
+        }
+
+        /*publicAccess*/
+        return {
+            databaseData: pushValue,
+            store:dataBase
+        }
+
+    })();
+
+    /*<!--APP COINTROLLER-->*/
+    var appctrl=(function(ui,data){
+        var additem = function(){
+            var x = ui.domValue();
+            var storeData = data.databaseData(x.type,x.amount,x.desc);
+            
+            ui.displayPub(storeData,x.type);
+        }
+        
+        document.querySelector(ui.domEle.btn).addEventListener("click", additem);
+        
+    })(uictrl,datactrl); 
+    </script>
+    
+</body>
+</html>
